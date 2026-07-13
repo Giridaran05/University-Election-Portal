@@ -3,7 +3,6 @@ import path from "path";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import ExcelJS from "exceljs";
-import { createServer as createViteServer } from "vite";
 import {
   Admins,
   Electors,
@@ -1111,6 +1110,7 @@ app.use(express.json({ limit: "50mb" }));
   if (!process.env.VERCEL) {
     const bootServer = async () => {
       if (process.env.NODE_ENV !== "production") {
+        const { createServer: createViteServer } = await import("vite");
         const vite = await createViteServer({
           server: { middlewareMode: true },
           appType: "spa",

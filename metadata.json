@@ -1,0 +1,8 @@
+{
+  "name": "Online Election Voting System",
+  "description": "A secure, responsive, and modern online election voting system with Elector and Admin portals, real-time results, custom charts, and Excel exports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

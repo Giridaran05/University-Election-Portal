@@ -2,12 +2,30 @@ import fs from "fs";
 import path from "path";
 import bcrypt from "bcryptjs";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const ORIGINAL_DATA_DIR = path.join(process.cwd(), "data");
+const DATA_DIR = process.env.VERCEL ? "/tmp/data" : ORIGINAL_DATA_DIR;
 
 // Helper to ensure data directory exists
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+
+  if (process.env.VERCEL) {
+    try {
+      if (fs.existsSync(ORIGINAL_DATA_DIR)) {
+        const files = fs.readdirSync(ORIGINAL_DATA_DIR);
+        for (const file of files) {
+          const src = path.join(ORIGINAL_DATA_DIR, file);
+          const dest = path.join(DATA_DIR, file);
+          if (!fs.existsSync(dest)) {
+            fs.copyFileSync(src, dest);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to copy pre-seeded data files to /tmp/data:", e);
+    }
   }
 }
 

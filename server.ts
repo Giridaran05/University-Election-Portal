@@ -97,9 +97,8 @@ function updateAndGetElections(): Election[] {
   return processed;
 }
 
-async function startServer() {
-  const app = express();
-  app.use(express.json({ limit: "50mb" }));
+const app = express();
+app.use(express.json({ limit: "50mb" }));
 
   // ==========================================
   // AUTHENTICATION APIs
@@ -1109,25 +1108,30 @@ async function startServer() {
   // VITE DEVELOPMENT MIDDLEWARE / PRODUCTION ASSET SERVING
   // ==========================================
 
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req: Request, res: Response) => {
-      res.sendFile(path.join(distPath, "index.html"));
+  if (!process.env.VERCEL) {
+    const bootServer = async () => {
+      if (process.env.NODE_ENV !== "production") {
+        const vite = await createViteServer({
+          server: { middlewareMode: true },
+          appType: "spa",
+        });
+        app.use(vite.middlewares);
+      } else {
+        const distPath = path.join(process.cwd(), "dist");
+        app.use(express.static(distPath));
+        app.get("*", (req: Request, res: Response) => {
+          res.sendFile(path.join(distPath, "index.html"));
+        });
+      }
+
+      app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Voting Server successfully booted on http://localhost:${PORT}`);
+      });
+    };
+
+    bootServer().catch((err) => {
+      console.error("Critical server startup failure:", err);
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Voting Server successfully booted on http://localhost:${PORT}`);
-  });
-}
-
-startServer().catch((err) => {
-  console.error("Critical server startup failure:", err);
-});
+export default app;
